@@ -56,7 +56,12 @@ function normalizeProduct(product, index) {
   return p;
 }
 
-async function getInventory() {
+async function getInventory(forceRefresh = false) {
+  // Force refresh if requested
+  if (forceRefresh) {
+    cachedInventory = null;
+  }
+
   // Return cached inventory if available
   if (cachedInventory) {
     return cachedInventory;
@@ -85,6 +90,10 @@ async function getInventory() {
   }
 }
 
+function clearInventoryCache() {
+  cachedInventory = null;
+}
+
 async function saveInventory(products) {
   const normalized = products.map((p, i) => normalizeProduct(p, i));
   localStorage.setItem(INVENTORY_KEY, JSON.stringify(normalized));
@@ -98,8 +107,12 @@ async function saveInventory(products) {
       body: JSON.stringify({ products: normalized })
     });
     if (!res.ok) throw new Error('Failed to save to server');
+    const result = await res.json();
+    console.log(`Saved ${result.count} products to inventory.json`);
+    return true;
   } catch (err) {
     console.error('Error saving inventory to server:', err);
+    return false;
   }
 }
 

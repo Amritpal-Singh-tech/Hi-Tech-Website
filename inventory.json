@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "id": "test1",
+    "name": "LG 1.5 Ton Split AC",
+    "price": 35000,
+    "category": "ac",
+    "brand": "LG",
+    "image": "https://example.com/ac.jpg",
+    "description": "Test AC description",
+    "specifications": {
+      "capacity": "1.5 Ton"
+    }
+  }
+]

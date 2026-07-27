@@ -107,12 +107,15 @@ app.post('/api/inventory', (req, res) => {
   try {
     const { products } = req.body;
     if (!Array.isArray(products)) {
+      console.error('Invalid request: products array required');
       return res.status(400).json({ error: 'Products array is required.' });
     }
     const success = saveInventory(products);
     if (success) {
+      console.log(`Successfully saved ${products.length} products to inventory.json`);
       res.json({ success: true, count: products.length });
     } else {
+      console.error('Failed to save inventory to file');
       res.status(500).json({ error: 'Could not save inventory.' });
     }
   } catch (err) {

@@ -29,7 +29,7 @@ document.querySelector('.contact-form').addEventListener('submit', function (e) 
 // Display imported inventory on homepage
 const storeProducts = document.getElementById('storeProducts');
 if (storeProducts) {
-  getInventory().then(products => {
+  getInventory(true).then(products => {
     renderProductCards(
       storeProducts,
       products,

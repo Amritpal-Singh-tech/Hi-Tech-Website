@@ -5,7 +5,7 @@ async function initProductFilters(options = {}) {
   const toolbar = document.getElementById('filterToolbar');
   if (!container || !toolbar) return;
 
-  const allProducts = await getInventory();
+  const allProducts = await getInventory(true);
   const bounds = getPriceBounds(allProducts);
 
   const params = new URLSearchParams(window.location.search);
@@ -130,7 +130,7 @@ function updateFilterMeta(found, total, state) {
 async function initHomeProductsPreview(limit = 6) {
   const container = document.getElementById('storeProducts');
   if (!container) return;
-  const products = (await getInventory()).slice(0, limit);
+  const products = (await getInventory(true)).slice(0, limit);
   renderSkeletonCards(container, 3);
   setTimeout(() => {
     renderProductCards(container, products, 'Products coming soon. Visit our showroom for the latest stock.');

@@ -73,6 +73,8 @@ function parseProducts(rows) {
 async function enrichAllProducts(products) {
   const enriched = [];
   setImporting(true);
+  let successCount = 0;
+  let errorCount = 0;
 
   for (let i = 0; i < products.length; i++) {
     const p = products[i];
@@ -85,7 +87,9 @@ async function enrichAllProducts(products) {
     try {
       const product = await enrichOneProduct(p.name, p.price);
       enriched.push(product);
-    } catch {
+      successCount++;
+    } catch (err) {
+      console.error(`Failed to enrich product "${p.name}":`, err);
       enriched.push({
         name: p.name,
         price: p.price,
@@ -98,15 +102,21 @@ async function enrichAllProducts(products) {
         coolingTechnology: 'Advanced Cooling System',
         description: `${p.name} — available at HI TECH REFRIGERATION & ELECTRONICS. Visit our showroom for full details.`
       });
+      errorCount++;
     }
 
     await saveInventory(enriched);
     displayProducts(enriched);
   }
 
+  // Clear cache to force reload from server
+  clearInventoryCache();
+
   setProgress(100);
   setImporting(false);
-  showStatus(`Done! ${enriched.length} products imported with images and descriptions.`, 'success');
+  const message = `Done! ${enriched.length} products imported. ${successCount} enriched successfully, ${errorCount} used fallback data.`;
+  showStatus(message, 'success');
+  console.log(`Import complete: ${successCount} successful, ${errorCount} fallbacks`);
   setTimeout(() => setProgress(0), 2000);
 }
 
@@ -312,4 +322,4 @@ adminSearchInput.addEventListener('input', async (e) => {
   renderAdminProductList(filtered);
 });
 
-displayProducts(await getInventory());
+displayProducts(await getInventory(true));
