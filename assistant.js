@@ -37,14 +37,17 @@ function initShoppingAssistant() {
     document.getElementById('aiPanel').hidden = true;
   });
 
-  document.getElementById('aiForm').addEventListener('submit', (e) => {
+  document.getElementById('aiForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const input = document.getElementById('aiInput');
     const q = input.value.trim();
     if (!q) return;
     appendAiMessage(q, 'user');
     input.value = '';
-    setTimeout(() => appendAiMessage(answerFromInventory(q), 'bot'), 300);
+    setTimeout(async () => {
+      const answer = await answerFromInventory(q);
+      appendAiMessage(answer, 'bot');
+    }, 300);
   });
 }
 
@@ -57,8 +60,8 @@ function appendAiMessage(text, role) {
   box.scrollTop = box.scrollHeight;
 }
 
-function answerFromInventory(question) {
-  const products = getInventory();
+async function answerFromInventory(question) {
+  const products = await getInventory();
   if (!products.length) {
     return 'Our inventory is empty right now. Please visit the showroom or check back after products are imported.';
   }

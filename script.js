@@ -29,9 +29,11 @@ document.querySelector('.contact-form').addEventListener('submit', function (e) 
 // Display imported inventory on homepage
 const storeProducts = document.getElementById('storeProducts');
 if (storeProducts) {
-  renderProductCards(
-    storeProducts,
-    getInventory(),
-    'Products coming soon. Visit our showroom for the latest stock.'
-  );
+  getInventory().then(products => {
+    renderProductCards(
+      storeProducts,
+      products,
+      'Products coming soon. Visit our showroom for the latest stock.'
+    );
+  });
 }

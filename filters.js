@@ -1,11 +1,11 @@
 /* Product filters — instant client-side filtering */
 
-function initProductFilters(options = {}) {
+async function initProductFilters(options = {}) {
   const container = document.getElementById(options.containerId || 'storeProducts');
   const toolbar = document.getElementById('filterToolbar');
   if (!container || !toolbar) return;
 
-  const allProducts = getInventory();
+  const allProducts = await getInventory();
   const bounds = getPriceBounds(allProducts);
 
   const params = new URLSearchParams(window.location.search);
@@ -18,7 +18,7 @@ function initProductFilters(options = {}) {
     sort: 'newest'
   };
 
-  renderFilterToolbar(toolbar, allProducts, bounds, state);
+  await renderFilterToolbar(toolbar, allProducts, bounds, state);
   applyFilters(container, allProducts, state);
 
   toolbar.addEventListener('input', (e) => {
@@ -35,7 +35,7 @@ function initProductFilters(options = {}) {
     applyFilters(container, allProducts, state);
   });
 
-  toolbar.addEventListener('click', (e) => {
+  toolbar.addEventListener('click', async (e) => {
     if (e.target.closest('#clearFilters')) {
       state.search = '';
       state.category = 'all';
@@ -43,14 +43,14 @@ function initProductFilters(options = {}) {
       state.minPrice = bounds.min;
       state.maxPrice = bounds.max;
       state.sort = 'newest';
-      renderFilterToolbar(toolbar, allProducts, bounds, state);
+      await renderFilterToolbar(toolbar, allProducts, bounds, state);
       applyFilters(container, allProducts, state);
     }
   });
 }
 
-function renderFilterToolbar(toolbar, products, bounds, state) {
-  const brands = getBrandList();
+async function renderFilterToolbar(toolbar, products, bounds, state) {
+  const brands = await getBrandList();
   const categories = getCategoryList().filter(c => c.value !== 'default');
 
   toolbar.innerHTML = `
@@ -127,10 +127,10 @@ function updateFilterMeta(found, total, state) {
   tagsEl.innerHTML = tags.map(t => `<span class="filter-tag">${escapeHtml(t)}</span>`).join('');
 }
 
-function initHomeProductsPreview(limit = 6) {
+async function initHomeProductsPreview(limit = 6) {
   const container = document.getElementById('storeProducts');
   if (!container) return;
-  const products = getInventory().slice(0, limit);
+  const products = (await getInventory()).slice(0, limit);
   renderSkeletonCards(container, 3);
   setTimeout(() => {
     renderProductCards(container, products, 'Products coming soon. Visit our showroom for the latest stock.');

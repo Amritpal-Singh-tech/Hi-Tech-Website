@@ -100,7 +100,7 @@ async function enrichAllProducts(products) {
       });
     }
 
-    saveInventory(enriched);
+    await saveInventory(enriched);
     displayProducts(enriched);
   }
 
@@ -151,8 +151,8 @@ function displayProducts(products) {
   updateStats();
 }
 
-function updateStats() {
-  const stats = getInventoryStats();
+async function updateStats() {
+  const stats = await getInventoryStats();
   if (statTotalProducts) statTotalProducts.textContent = stats.totalProducts;
   if (statTotalBrands) statTotalBrands.textContent = stats.totalBrands;
   if (statTotalCategories) statTotalCategories.textContent = stats.totalCategories;
@@ -202,8 +202,8 @@ async function handleProductAction(e) {
     openEditModal(id);
   } else if (action === 'delete') {
     if (confirm('Are you sure you want to delete this product?')) {
-      deleteProduct(id);
-      displayProducts(getInventory());
+      await deleteProduct(id);
+      displayProducts(await getInventory());
     }
   } else if (action === 'refresh') {
     const name = e.target.dataset.name;
@@ -212,8 +212,8 @@ async function handleProductAction(e) {
   }
 }
 
-function openEditModal(id) {
-  const product = getProductById(id);
+async function openEditModal(id) {
+  const product = await getProductById(id);
   if (!product) return;
 
   document.getElementById('editProductId').value = product.id;
@@ -238,7 +238,7 @@ function closeEditModal() {
   document.body.style.overflow = '';
 }
 
-editForm.addEventListener('submit', (e) => {
+editForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = document.getElementById('editProductId').value;
   const updates = {
@@ -254,9 +254,9 @@ editForm.addEventListener('submit', (e) => {
     coolingTechnology: document.getElementById('editCooling').value,
     description: document.getElementById('editDescription').value
   };
-  updateProduct(id, updates);
+  await updateProduct(id, updates);
   closeEditModal();
-  displayProducts(getInventory());
+  displayProducts(await getInventory());
 });
 
 editModal.querySelector('.product-modal-close').addEventListener('click', closeEditModal);
@@ -286,8 +286,8 @@ async function refreshProductData(id, name, price) {
       description: refreshed.description,
       features: refreshed.features
     };
-    updateProduct(id, updates);
-    displayProducts(getInventory());
+    await updateProduct(id, updates);
+    displayProducts(await getInventory());
     showStatus('Product data refreshed successfully!', 'success');
   } catch (err) {
     showStatus('Failed to refresh product. Server may not be running.', 'error');
@@ -300,9 +300,9 @@ async function refreshProductData(id, name, price) {
 }
 
 // Admin search
-adminSearchInput.addEventListener('input', (e) => {
+adminSearchInput.addEventListener('input', async (e) => {
   const query = e.target.value.toLowerCase().trim();
-  const allProducts = getInventory();
+  const allProducts = await getInventory();
   const filtered = query 
     ? allProducts.filter(p => 
         p.name.toLowerCase().includes(query) || 
@@ -312,4 +312,4 @@ adminSearchInput.addEventListener('input', (e) => {
   renderAdminProductList(filtered);
 });
 
-displayProducts(getInventory());
+displayProducts(await getInventory());

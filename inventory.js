@@ -1,6 +1,9 @@
 const INVENTORY_KEY = 'hitech_inventory';
 const API_BASE = window.location.origin;
 
+// Cache inventory in memory to avoid frequent API calls
+let cachedInventory = null;
+
 const CATEGORY_LABELS = {
   ac: 'Air Conditioners',
   refrigerator: 'Refrigerators',
@@ -53,45 +56,76 @@ function normalizeProduct(product, index) {
   return p;
 }
 
-function getInventory() {
+async function getInventory() {
+  // Return cached inventory if available
+  if (cachedInventory) {
+    return cachedInventory;
+  }
+
   try {
-    const data = localStorage.getItem(INVENTORY_KEY);
-    const products = data ? JSON.parse(data) : [];
+    const res = await fetch(`${API_BASE}/api/inventory`);
+    if (!res.ok) throw new Error('Failed to load inventory');
+    const data = await res.json();
+    const products = data.products || [];
     const normalized = products.map((p, i) => normalizeProduct(p, i));
-    if (JSON.stringify(normalized) !== JSON.stringify(products)) {
-      saveInventory(normalized);
-    }
+    cachedInventory = normalized;
     return normalized;
-  } catch {
-    return [];
+  } catch (err) {
+    console.error('Error loading inventory from server:', err);
+    // Fallback to localStorage if server is unavailable
+    try {
+      const data = localStorage.getItem(INVENTORY_KEY);
+      const products = data ? JSON.parse(data) : [];
+      const normalized = products.map((p, i) => normalizeProduct(p, i));
+      cachedInventory = normalized;
+      return normalized;
+    } catch {
+      return [];
+    }
   }
 }
 
-function saveInventory(products) {
-  localStorage.setItem(INVENTORY_KEY, JSON.stringify(products.map((p, i) => normalizeProduct(p, i))));
+async function saveInventory(products) {
+  const normalized = products.map((p, i) => normalizeProduct(p, i));
+  localStorage.setItem(INVENTORY_KEY, JSON.stringify(normalized));
+  cachedInventory = normalized;
+
+  // Also save to server
+  try {
+    const res = await fetch(`${API_BASE}/api/inventory`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ products: normalized })
+    });
+    if (!res.ok) throw new Error('Failed to save to server');
+  } catch (err) {
+    console.error('Error saving inventory to server:', err);
+  }
 }
 
-function getProductById(id) {
-  return getInventory().find(p => p.id === id);
+async function getProductById(id) {
+  const products = await getInventory();
+  return products.find(p => p.id === id);
 }
 
-function updateProduct(id, updates) {
-  const products = getInventory();
+async function updateProduct(id, updates) {
+  const products = await getInventory();
   const index = products.findIndex(p => p.id === id);
   if (index === -1) return null;
   products[index] = normalizeProduct({ ...products[index], ...updates, id }, index);
-  saveInventory(products);
+  await saveInventory(products);
   return products[index];
 }
 
-function deleteProduct(id) {
-  const products = getInventory().filter(p => p.id !== id);
-  saveInventory(products);
-  return products;
+async function deleteProduct(id) {
+  const products = await getInventory();
+  const filtered = products.filter(p => p.id !== id);
+  await saveInventory(filtered);
+  return filtered;
 }
 
-function getInventoryStats() {
-  const products = getInventory();
+async function getInventoryStats() {
+  const products = await getInventory();
   const categories = new Set(products.map(p => p.category));
   const brands = new Set(products.map(p => p.brand).filter(Boolean));
   const fallbackImage = 'images.unsplash.com/photo-1468495244123';
@@ -111,8 +145,9 @@ function getCategoryList() {
   return Object.entries(CATEGORY_LABELS).map(([value, label]) => ({ value, label }));
 }
 
-function getBrandList() {
-  const brands = new Set(getInventory().map(p => p.brand).filter(Boolean));
+async function getBrandList() {
+  const products = await getInventory();
+  const brands = new Set(products.map(p => p.brand).filter(Boolean));
   return [...brands].sort();
 }
 
