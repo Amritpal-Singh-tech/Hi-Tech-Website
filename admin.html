@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — HI TECH</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+  <header class="admin-header">
+    <div class="container admin-header-inner">
+      <div class="admin-brand">
+        <span class="logo-icon">⚡</span>
+        <div>
+          <strong>HI TECH Admin</strong>
+          <small>Inventory Management</small>
+        </div>
+      </div>
+      <a href="index.html" class="btn btn-outline admin-back">← Back to Website</a>
+    </div>
+  </header>
+
+  <main class="admin-main container">
+    <section class="admin-panel">
+      <h1>Admin Dashboard</h1>
+      <p class="admin-subtitle">Manage your product inventory with import, edit, and refresh tools.</p>
+
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <strong id="statTotalProducts">0</strong>
+          <span>Total Products</span>
+        </div>
+        <div class="stat-card">
+          <strong id="statTotalBrands">0</strong>
+          <span>Brands</span>
+        </div>
+        <div class="stat-card">
+          <strong id="statTotalCategories">0</strong>
+          <span>Categories</span>
+        </div>
+        <div class="stat-card warn">
+          <strong id="statMissingImages">0</strong>
+          <span>Missing Images</span>
+        </div>
+      </div>
+
+      <div class="import-box">
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" hidden>
+        <button type="button" id="importBtn" class="btn btn-primary btn-import">
+          Import Inventory
+        </button>
+        <p class="import-hint">Excel file must have columns: <strong>Product Name</strong> and <strong>Price</strong></p>
+        <p class="import-note">After import, each product is searched online for image, specs, and description — then saved automatically.</p>
+        <div id="progressBar" class="progress-bar" hidden>
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <p id="importStatus" class="import-status"></p>
+      </div>
+
+      <div class="recent-imports-section">
+        <h3>Recent Imports</h3>
+        <ul id="recentImportsList" class="recent-list"></ul>
+      </div>
+    </section>
+
+    <section class="admin-inventory">
+      <div class="inventory-header">
+        <h2>Current Inventory</h2>
+        <span id="productCount" class="product-count">0 products</span>
+      </div>
+      <div class="admin-search-bar">
+        <input type="search" id="adminSearchInput" placeholder="Search products by name or brand...">
+      </div>
+      <div id="productList" class="product-list"></div>
+    </section>
+  </main>
+
+  <div id="editModal" class="product-modal edit-modal" hidden>
+    <div class="product-modal-backdrop"></div>
+    <div class="product-modal-dialog">
+      <button type="button" class="product-modal-close" aria-label="Close">&times;</button>
+      <div class="product-modal-content">
+        <h2>Edit Product</h2>
+        <form id="editForm" class="edit-form">
+          <input type="hidden" id="editProductId">
+          <label for="editName">Product Name</label>
+          <input type="text" id="editName" required>
+          <label for="editPrice">Selling Price (₹)</label>
+          <input type="number" id="editPrice" required>
+          <label for="editImage">Image URL</label>
+          <input type="url" id="editImage">
+          <label for="editCategory">Category</label>
+          <select id="editCategory">
+            <option value="ac">Air Conditioners</option>
+            <option value="refrigerator">Refrigerators</option>
+            <option value="washing">Washing Machines</option>
+            <option value="tv">LED TVs</option>
+            <option value="microwave">Microwaves</option>
+            <option value="kitchen">Kitchen Appliances</option>
+            <option value="default">Other</option>
+          </select>
+          <label for="editBrand">Brand</label>
+          <input type="text" id="editBrand">
+          <label for="editCapacity">Capacity</label>
+          <input type="text" id="editCapacity">
+          <label for="editColor">Color</label>
+          <input type="text" id="editColor">
+          <label for="editEnergy">Energy Rating</label>
+          <input type="text" id="editEnergy">
+          <label for="editWarranty">Warranty</label>
+          <input type="text" id="editWarranty">
+          <label for="editCooling">Cooling Technology</label>
+          <input type="text" id="editCooling">
+          <label for="editDescription">Description</label>
+          <textarea id="editDescription" rows="4"></textarea>
+          <button type="submit" class="btn btn-primary btn-full">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="inventory.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

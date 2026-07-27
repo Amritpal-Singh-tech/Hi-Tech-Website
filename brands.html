@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brands — HI TECH REFRIGERATION & ELECTRONICS</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="site-nav"></div>
+
+  <section class="page-hero">
+    <div class="container">
+      <h1>Our Brands</h1>
+      <p>Authorized dealer for India's most trusted appliance brands.</p>
+    </div>
+  </section>
+
+  <section class="page-section">
+    <div class="container">
+      <div id="brandGrid" class="brand-grid"></div>
+      <div class="section-cta">
+        <a href="products.html" class="btn btn-primary">View All Products</a>
+      </div>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script src="inventory.js"></script>
+  <script src="shared.js"></script>
+  <script src="assistant.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const grid = document.getElementById('brandGrid');
+      const products = getInventory();
+      const brandMap = {};
+
+      products.forEach(p => {
+        const b = p.brand || 'Other';
+        if (!brandMap[b]) brandMap[b] = 0;
+        brandMap[b]++;
+      });
+
+      const brands = Object.entries(brandMap).sort((a, b) => b[1] - a[1]);
+
+      if (!brands.length) {
+        grid.innerHTML = '<p class="inventory-empty" style="grid-column:1/-1">Brands will appear here after products are imported.</p>';
+        KNOWN_BRANDS.slice(0, 12).forEach(b => {
+          grid.innerHTML += `<a href="products.html?brand=${encodeURIComponent(b)}" class="brand-card fade-up">${b}</a>`;
+        });
+        observeFadeElements(grid);
+        return;
+      }
+
+      grid.innerHTML = brands.map(([brand, count]) => `
+        <a href="products.html?brand=${encodeURIComponent(brand)}" class="brand-card fade-up">
+          ${brand}
+          <small>${count} product${count > 1 ? 's' : ''}</small>
+        </a>
+      `).join('');
+      observeFadeElements(grid);
+    });
+  </script>
+</body>
+</html>

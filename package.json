@@ -1,0 +1,13 @@
+{
+  "name": "hitech-website",
+  "version": "1.0.0",
+  "description": "HI TECH Refrigeration & Electronics website",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
+  }
+}
