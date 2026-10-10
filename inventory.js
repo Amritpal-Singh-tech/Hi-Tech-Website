@@ -218,10 +218,18 @@ async function getInventory(forceRefresh = false) {
   }
 
   try {
-    const res = await fetch(`${API_BASE}/api/inventory`);
-    if (!res.ok) throw new Error('Failed to load inventory');
-    const data = await res.json();
-    const products = data.products || [];
+    let products;
+    try {
+      const res = await fetch(`${API_BASE}/api/inventory`);
+      if (!res.ok) throw new Error('No API server');
+      products = (await res.json()).products || [];
+    } catch {
+      // Static hosting (no Node server): read the published inventory.json file instead
+      const res = await fetch('inventory.json', { cache: 'no-cache' });
+      if (!res.ok) throw new Error('Failed to load inventory');
+      const data = await res.json();
+      products = Array.isArray(data) ? data : (data.products || []);
+    }
     const normalized = products.map((p, i) => normalizeProduct(p, i));
     cachedInventory = normalized;
     return normalized;
