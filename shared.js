@@ -10,7 +10,38 @@ function initSharedLayout() {
   initNavSearch();
   initHeaderScroll();
   hidePageLoader();
-  observeFadeElements();
+  initAutoScroll();
+  if (typeof observeFadeElements === 'function') {
+    observeFadeElements();
+  }
+}
+
+function scrollToProductsSection(smooth = true) {
+  const target = document.getElementById('filterToolbar') ||
+                 document.getElementById('storeProducts') ||
+                 document.getElementById('inventory');
+  if (!target) return;
+
+  const header = document.getElementById('siteHeader');
+  const headerOffset = header ? header.offsetHeight + 16 : 90;
+  const elementPosition = target.getBoundingClientRect().top;
+  const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+  window.scrollTo({
+    top: Math.max(0, offsetPosition),
+    behavior: smooth ? 'smooth' : 'auto'
+  });
+}
+
+function initAutoScroll() {
+  const path = window.location.pathname.split('/').pop() || 'index.html';
+
+  if (path === 'products.html' || window.location.hash) {
+    const doScroll = () => scrollToProductsSection(false);
+    doScroll();
+    setTimeout(doScroll, 80);
+    setTimeout(doScroll, 300);
+  }
 }
 
 function injectNav() {
@@ -23,7 +54,7 @@ function injectNav() {
   mount.innerHTML = `
     <div class="top-bar">
       <div class="container top-bar-inner">
-        <span>📞 Call us: +91 98765 43210</span>
+        <span>📞 Call us: +91 62845 37273</span>
         <span>🕐 Mon–Sat: 9:00 AM – 8:00 PM</span>
       </div>
     </div>
@@ -39,7 +70,7 @@ function injectNav() {
 
         <nav class="nav" id="mainNav" aria-label="Main navigation">
           <a href="index.html" class="nav-link${isActive('index.html')}">Home</a>
-          <a href="products.html" class="nav-link${isActive('products.html')}">Products</a>
+          <a href="products.html#storeProducts" class="nav-link${isActive('products.html')}">Products</a>
           <a href="brands.html" class="nav-link${isActive('brands.html')}">Brands</a>
           <a href="about.html" class="nav-link${isActive('about.html')}">About Us</a>
           <a href="contact.html" class="nav-link${isActive('contact.html')}">Contact</a>
@@ -59,11 +90,11 @@ function injectNav() {
       </div>
       <div class="mobile-nav" id="mobileNav" hidden>
         <a href="index.html">Home</a>
-        <a href="products.html">Products</a>
+        <a href="products.html#storeProducts">Products</a>
         <a href="brands.html">Brands</a>
         <a href="about.html">About Us</a>
         <a href="contact.html">Contact</a>
-        <a href="tel:+919876543210" class="mobile-call">📞 Call Now</a>
+        <a href="tel:+916284537273" class="mobile-call">📞 Call Now</a>
       </div>
     </header>
   `;
@@ -83,29 +114,29 @@ function injectFooter() {
             <a href="#" aria-label="Facebook">f</a>
             <a href="#" aria-label="Instagram">◎</a>
             <a href="#" aria-label="YouTube">▶</a>
-            <a href="https://wa.me/919876543210" aria-label="WhatsApp">💬</a>
+            <a href="https://wa.me/916284537273" aria-label="WhatsApp">💬</a>
           </div>
         </div>
         <div class="footer-links">
           <h5>Quick Links</h5>
           <a href="index.html">Home</a>
-          <a href="products.html">Products</a>
+          <a href="products.html#storeProducts">Products</a>
           <a href="brands.html">Brands</a>
           <a href="about.html">About Us</a>
           <a href="contact.html">Contact</a>
         </div>
         <div class="footer-links">
           <h5>Categories</h5>
-          <a href="products.html?category=ac">Air Conditioners</a>
-          <a href="products.html?category=refrigerator">Refrigerators</a>
-          <a href="products.html?category=washing">Washing Machines</a>
-          <a href="products.html?category=tv">LED TVs</a>
-          <a href="products.html?category=microwave">Microwaves</a>
-          <a href="products.html?category=kitchen">Kitchen Appliances</a>
+          <a href="products.html?category=ac#storeProducts">Air Conditioners</a>
+          <a href="products.html?category=refrigerator#storeProducts">Refrigerators</a>
+          <a href="products.html?category=washing#storeProducts">Washing Machines</a>
+          <a href="products.html?category=tv#storeProducts">LED TVs</a>
+          <a href="products.html?category=microwave#storeProducts">Microwaves</a>
+          <a href="products.html?category=kitchen#storeProducts">Kitchen Appliances</a>
         </div>
         <div class="footer-contact">
           <h5>Contact</h5>
-          <p>📞 +91 98765 43210</p>
+          <p>📞 +91 62845 37273</p>
           <p>✉️ info@hitech-electronics.com</p>
           <p>📍 123 Main Market Road, Your City</p>
         </div>
@@ -194,9 +225,9 @@ function initNavSearch() {
     e.preventDefault();
     const q = document.getElementById('navSearchInput')?.value.trim();
     if (q) {
-      window.location.href = `products.html?q=${encodeURIComponent(q)}`;
+      window.location.href = `products.html?q=${encodeURIComponent(q)}#storeProducts`;
     } else {
-      window.location.href = 'products.html';
+      window.location.href = 'products.html#storeProducts';
     }
   });
 }

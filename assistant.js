@@ -76,7 +76,11 @@ async function answerFromInventory(question) {
   const maxPrice = extractBudget(q, 'max');
   const minPrice = extractBudget(q, 'min');
   const category = detectCategoryFromQuestion(q);
-  const brand = KNOWN_BRANDS.find(b => q.includes(b.toLowerCase()));
+  const brand = KNOWN_BRANDS.find(b => {
+    const escaped = b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(^|[^a-zA-Z0-9])${escaped}([^a-zA-Z0-9]|$)`, 'i');
+    return regex.test(q);
+  });
 
   if (category) filtered = filtered.filter(p => p.category === category);
   if (brand) filtered = filtered.filter(p => (p.brand || '').toLowerCase() === brand.toLowerCase());
@@ -131,17 +135,26 @@ function detectCategoryFromQuestion(q) {
 }
 
 function extractBudget(q, type) {
+  const kPattern = type === 'max'
+    ? /(?:below|under|max|budget|within|upto|up\s*to)\s*₹?\s*(\d+(?:\.\d+)?)\s*k\b/i
+    : /(?:above|over|min|at\s*least)\s*₹?\s*(\d+(?:\.\d+)?)\s*k\b/i;
+  const kMatch = q.match(kPattern);
+  if (kMatch) return Math.round(parseFloat(kMatch[1]) * 1000);
+
+  const lakhPattern = type === 'max'
+    ? /(?:below|under|max|budget|within|upto|up\s*to)\s*₹?\s*(\d+(?:\.\d+)?)\s*(?:lakh|lac)\b/i
+    : /(?:above|over|min|at\s*least)\s*₹?\s*(\d+(?:\.\d+)?)\s*(?:lakh|lac)\b/i;
+  const lakhMatch = q.match(lakhPattern);
+  if (lakhMatch) return Math.round(parseFloat(lakhMatch[1]) * 100000);
+
   const patterns = type === 'max'
-    ? [/below\s*₹?\s*([\d,]+)/i, /under\s*₹?\s*([\d,]+)/i, /max\s*₹?\s*([\d,]+)/i, /budget\s*₹?\s*([\d,]+)/i]
-    : [/above\s*₹?\s*([\d,]+)/i, /over\s*₹?\s*([\d,]+)/i, /min\s*₹?\s*([\d,]+)/i];
+    ? [/(?:below|under|max|budget|within|upto|up\s*to)\s*₹?\s*([\d,]+)/i]
+    : [/(?:above|over|min|at\s*least)\s*₹?\s*([\d,]+)/i];
 
   for (const pattern of patterns) {
     const m = q.match(pattern);
     if (m) return parseInt(m[1].replace(/,/g, ''), 10);
   }
-
-  const lakh = q.match(/(\d+(?:\.\d+)?)\s*(?:lakh|lac)/i);
-  if (lakh && type === 'max') return Math.round(parseFloat(lakh[1]) * 100000);
 
   return null;
 }

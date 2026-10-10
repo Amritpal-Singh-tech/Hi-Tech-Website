@@ -21,6 +21,18 @@ async function initProductFilters(options = {}) {
   await renderFilterToolbar(toolbar, allProducts, bounds, state);
   applyFilters(container, allProducts, state);
 
+  if (typeof scrollToProductsSection === 'function') {
+    scrollToProductsSection(false);
+    setTimeout(() => scrollToProductsSection(false), 200);
+  }
+
+  toolbar.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.id === 'filterCategory' || t.id === 'filterBrand' || t.id === 'filterSort') {
+      if (typeof scrollToProductsSection === 'function') scrollToProductsSection(true);
+    }
+  });
+
   toolbar.addEventListener('input', (e) => {
     const t = e.target;
     if (t.id === 'filterSearch') state.search = t.value;
@@ -45,6 +57,7 @@ async function initProductFilters(options = {}) {
       state.sort = 'newest';
       await renderFilterToolbar(toolbar, allProducts, bounds, state);
       applyFilters(container, allProducts, state);
+      if (typeof scrollToProductsSection === 'function') scrollToProductsSection(true);
     }
   });
 }

@@ -29,6 +29,15 @@ html {
   scroll-behavior: smooth;
 }
 
+#storeProducts,
+#filterToolbar,
+#inventory,
+.filter-toolbar,
+.page-section,
+section[id] {
+  scroll-margin-top: 100px;
+}
+
 body {
   font-family: 'Inter', system-ui, sans-serif;
   color: var(--text);

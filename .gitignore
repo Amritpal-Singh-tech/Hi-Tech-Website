@@ -1,1 +1,8 @@
 node_modules/
+backups/
+*.csv
+inventory.backup.json
+missing-images.txt
+*.tmp
+.env
+.DS_Store

@@ -24,7 +24,7 @@
     <div class="container">
       <div id="brandGrid" class="brand-grid"></div>
       <div class="section-cta">
-        <a href="products.html" class="btn btn-primary">View All Products</a>
+        <a href="products.html#storeProducts" class="btn btn-primary">View All Products</a>
       </div>
     </div>
   </section>
@@ -35,9 +35,9 @@
   <script src="shared.js"></script>
   <script src="assistant.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       const grid = document.getElementById('brandGrid');
-      const products = getInventory();
+      const products = await getInventory();
       const brandMap = {};
 
       products.forEach(p => {
@@ -49,16 +49,15 @@
       const brands = Object.entries(brandMap).sort((a, b) => b[1] - a[1]);
 
       if (!brands.length) {
-        grid.innerHTML = '<p class="inventory-empty" style="grid-column:1/-1">Brands will appear here after products are imported.</p>';
-        KNOWN_BRANDS.slice(0, 12).forEach(b => {
-          grid.innerHTML += `<a href="products.html?brand=${encodeURIComponent(b)}" class="brand-card fade-up">${b}</a>`;
-        });
+        const emptyMsg = '<p class="inventory-empty" style="grid-column:1/-1">Brands will appear here after products are imported.</p>';
+        const cards = KNOWN_BRANDS.slice(0, 12).map(b => `<a href="products.html?brand=${encodeURIComponent(b)}#storeProducts" class="brand-card fade-up">${escapeHtml(b)}</a>`).join('');
+        grid.innerHTML = emptyMsg + cards;
         observeFadeElements(grid);
         return;
       }
 
       grid.innerHTML = brands.map(([brand, count]) => `
-        <a href="products.html?brand=${encodeURIComponent(brand)}" class="brand-card fade-up">
+        <a href="products.html?brand=${encodeURIComponent(brand)}#storeProducts" class="brand-card fade-up">
           ${brand}
           <small>${count} product${count > 1 ? 's' : ''}</small>
         </a>

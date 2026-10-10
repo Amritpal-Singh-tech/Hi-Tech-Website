@@ -31,9 +31,27 @@ function loadInventory() {
   }
 }
 
+// Keep timestamped copies of inventory.json (at most one per 5 minutes, newest 20 kept)
+const BACKUP_DIR = path.join(__dirname, 'backups');
+function backupInventory() {
+  try {
+    if (!fs.existsSync(INVENTORY_FILE) || fs.statSync(INVENTORY_FILE).size < 10) return;
+    fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    const files = fs.readdirSync(BACKUP_DIR).filter(f => f.endsWith('.json')).sort();
+    const last = files[files.length - 1];
+    if (last && Date.now() - fs.statSync(path.join(BACKUP_DIR, last)).mtimeMs < 5 * 60 * 1000) return;
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    fs.copyFileSync(INVENTORY_FILE, path.join(BACKUP_DIR, `inventory-${stamp}.json`));
+    files.slice(0, Math.max(0, files.length - 19)).forEach(f => fs.unlinkSync(path.join(BACKUP_DIR, f)));
+  } catch (e) {
+    console.error('Backup failed:', e.message);
+  }
+}
+
 // Save inventory to file
 function saveInventory(products) {
   try {
+    backupInventory();
     fs.writeFileSync(INVENTORY_FILE, JSON.stringify(products, null, 2));
     return true;
   } catch (err) {
@@ -79,7 +97,11 @@ app.post('/api/enrich-all', async (req, res) => {
     }
 
     const enriched = [];
-    for (const item of products) {
+    for (let i = 0; i < products.length; i++) {
+      if (i > 0) {
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
+      const item = products[i];
       const product = await enrichProduct(String(item.name || '').trim(), item.price);
       enriched.push(product);
     }

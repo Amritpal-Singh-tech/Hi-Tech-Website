@@ -11,14 +11,59 @@ const CATEGORY_LABELS = {
   tv: 'LED TVs',
   microwave: 'Microwaves',
   kitchen: 'Kitchen Appliances',
+  geyser: 'Water Heaters & Geysers',
+  battery: 'Inverters & Batteries',
+  cooler: 'Water Coolers & Dispensers',
+  audio: 'Soundbars & Audio',
   default: 'Other Appliances'
 };
 
 const KNOWN_BRANDS = [
   'LG', 'Samsung', 'Whirlpool', 'Sony', 'Panasonic', 'Haier', 'Godrej',
-  'Voltas', 'Daikin', 'Blue Star', 'Hitachi', 'IFB', 'Bosch', 'Siemens',
-  'Philips', 'Prestige', 'Bajaj', 'Crompton', 'Havells', 'Mi', 'Realme',
-  'OnePlus', 'TCL', 'Hisense', 'Carrier', 'Lloyd', 'Onida', 'Videocon'
+  'Voltas Beko', 'Voltas', 'Daikin', 'Blue Star', 'Hitachi', 'IFB', 'Bosch',
+  'Siemens', 'Philips', 'Prestige', 'Bajaj', 'Crompton', 'Havells', 'Mi',
+  'Realme', 'OnePlus', 'TCL', 'Hisense', 'Carrier', 'Lloyd', 'Onida',
+  'Videocon', 'Kelvinator', 'BPL', 'Microtek', 'Luminous', 'Exide',
+  'Envitek', 'Celfrost', 'Inalsa', 'Glen', 'Kaff', 'Usha', 'Orient',
+  'Polar', 'Kenstar', 'boAt', 'Wybor', 'Zunvolt', 'Toshiba', 'Mitsubishi'
+];
+
+const BRAND_ALIASES = [
+  { match: /\b(whirlpool|wp)\b/i, name: 'Whirlpool' },
+  { match: /\b(godrej)\b/i, name: 'Godrej' },
+  { match: /\b(haier)\b/i, name: 'Haier' },
+  { match: /\b(voltas\s*beko|voltbek)\b/i, name: 'Voltas Beko' },
+  { match: /\b(voltas)\b/i, name: 'Voltas' },
+  { match: /\b(onida)\b/i, name: 'Onida' },
+  { match: /\b(lg)\b/i, name: 'LG' },
+  { match: /\b(samsung)\b/i, name: 'Samsung' },
+  { match: /\b(bpl)\b/i, name: 'BPL' },
+  { match: /\b(kelvinator|kelivinator|kel)\b/i, name: 'Kelvinator' },
+  { match: /\b(lloyd|llyod)\b/i, name: 'Lloyd' },
+  { match: /\b(daikin)\b/i, name: 'Daikin' },
+  { match: /\b(blue\s*star|bluestar)\b/i, name: 'Blue Star' },
+  { match: /\b(mitsubishi)\b/i, name: 'Mitsubishi' },
+  { match: /\b(sony)\b/i, name: 'Sony' },
+  { match: /\b(ifb)\b/i, name: 'IFB' },
+  { match: /\b(philips)\b/i, name: 'Philips' },
+  { match: /\b(tcl)\b/i, name: 'TCL' },
+  { match: /\b(toshiba)\b/i, name: 'Toshiba' },
+  { match: /\b(microtek)\b/i, name: 'Microtek' },
+  { match: /\b(luminous|lum)\b/i, name: 'Luminous' },
+  { match: /\b(exide)\b/i, name: 'Exide' },
+  { match: /\b(envitek)\b/i, name: 'Envitek' },
+  { match: /\b(celfrost)\b/i, name: 'Celfrost' },
+  { match: /\b(inalsa)\b/i, name: 'Inalsa' },
+  { match: /\b(glen)\b/i, name: 'Glen' },
+  { match: /\b(kaff)\b/i, name: 'Kaff' },
+  { match: /\b(usha)\b/i, name: 'Usha' },
+  { match: /\b(orient)\b/i, name: 'Orient' },
+  { match: /\b(polar)\b/i, name: 'Polar' },
+  { match: /\b(crompton)\b/i, name: 'Crompton' },
+  { match: /\b(kenstar)\b/i, name: 'Kenstar' },
+  { match: /\b(boat)\b/i, name: 'boAt' },
+  { match: /\b(wybor)\b/i, name: 'Wybor' },
+  { match: /\b(zunvolt)\b/i, name: 'Zunvolt' }
 ];
 
 function generateProductId() {
@@ -27,20 +72,29 @@ function generateProductId() {
 
 function detectCategory(name) {
   const n = (name || '').toLowerCase();
-  if (/\b(ac|air.?condition|split|inverter.?ac|ton\b)/i.test(n)) return 'ac';
-  if (/\b(ref|refrigerat|fridge|freezer)/i.test(n)) return 'refrigerator';
-  if (/\b(wash|washing|wm\b|front.?load|top.?load)/i.test(n)) return 'washing';
-  if (/\b(tv|television|led|smart.?tv|bravia|oled|qled)/i.test(n)) return 'tv';
-  if (/\b(microwave|mw\b|convection|grill.?oven)/i.test(n)) return 'microwave';
-  if (/\b(mixer|chimney|purifier|induction|oven|appliance|grinder)/i.test(n)) return 'kitchen';
-  return 'default';
+  if (/\b(battery|ups|150ah|200ah|160ah|220ah|eco\s*watt|red\s*charge|eco\s*charge|intt)\b/i.test(n)) return 'battery';
+  if (/\b(geyser|water\s*heater|storage\s*heater|storage\s*hearter)\b/i.test(n)) return 'geyser';
+  if (/\b(water\s*cooler|watercooler|water\s*dispenser|r\/o|commercial\s*r\/o)\b/i.test(n)) return 'cooler';
+  if (/\b(tv\b|television|led\b|smart\s*tv|qled|bravia|onkyo|oled)\b/i.test(n)) return 'tv';
+  if (/\b(soundbar|speaker|speakers|bar\s*1550|party\s*speaker)\b/i.test(n)) return 'audio';
+  if (/\b(ac\b|sac\b|\b1\.5t\b|\b1\.3t\b|\b1\.6t\b|\b1\.7t\b|\b2\s*ton\b|\b1ton\b|\b1\.5\s*ton\b|split|spilt|inverter\s*ac|neocool|magicool|3dcool|vectra|vertis|tsnq|usnq|usuq|usuh)\b/i.test(n)) return 'ac';
+  if (/\b(ws\b|wm\b|w\/m\b|washing|satt|front\s*load|top\s*load|f\/load|hydrowash|ace\s*xl|semi\s*auto|wtt|wfl)\b/i.test(n)) return 'washing';
+  if (/\b(ref\b|refrigerat|fridge|freezer|impc|impro|eon|emarvel|chest\s*ref|chest\s*freezer|cfcc|\bcf\b|\brd\b|\brt\b|gl-b|gl-d|gl-n|gl-t|rdc|hrd|sbs)\b/i.test(n)) return 'refrigerator';
+  if (/\b(microwave|mwo|mw\b|\bmicro\b|magicook|otg)\b/i.test(n)) return 'microwave';
+  if (/\b(chimny|chimney|fan|iron|jmg|induction|infrared|toaster|sandwich|stove|washer|powershot|stabilizer|stabiliser|actd|lvp|mixer|purifier|oven|grinder|blender|cooker|kettle)\b/i.test(n)) return 'kitchen';
+  return 'kitchen';
 }
 
 function detectBrand(name, product) {
   if (product && product.brand) return product.brand;
-  const upper = (name || '').toUpperCase();
+  const str = String(name || '');
+  for (const alias of BRAND_ALIASES) {
+    if (alias.match.test(str)) return alias.name;
+  }
   for (const brand of KNOWN_BRANDS) {
-    if (upper.includes(brand.toUpperCase())) return brand;
+    const escaped = brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(^|[^a-zA-Z0-9])${escaped}([^a-zA-Z0-9]|$)`, 'i');
+    if (regex.test(str)) return brand;
   }
   return '';
 }
@@ -52,8 +106,104 @@ function normalizeProduct(product, index) {
   p.price = Number(p.price) || 0;
   p.category = p.category || detectCategory(p.name);
   p.brand = detectBrand(p.name, p);
+  if (p.specifications && typeof p.specifications === 'object') {
+    if (!p.capacity && p.specifications.capacity) p.capacity = p.specifications.capacity;
+    if (!p.energyRating && p.specifications.energyRating) p.energyRating = p.specifications.energyRating;
+    if (!p.warranty && p.specifications.warranty) p.warranty = p.specifications.warranty;
+    if (!p.coolingTechnology && p.specifications.coolingTechnology) p.coolingTechnology = p.specifications.coolingTechnology;
+    if (!p.color && p.specifications.color) p.color = p.specifications.color;
+  }
   if (!p.enrichedAt) p.enrichedAt = new Date().toISOString();
   return p;
+}
+
+function createSmartProduct(name, price) {
+  const cleanName = String(name || '').trim();
+  const category = detectCategory(cleanName);
+  const brand = detectBrand(cleanName);
+
+  let capacity = 'Standard';
+  const capMatch = cleanName.match(/(\d+(?:\.\d+)?)\s*(?:ton|tonne|l|ltr|litre|kg|kgs|inch|")\b/i);
+  if (capMatch) capacity = capMatch[0];
+
+  const categoryDefaults = {
+    ac: {
+      color: 'White',
+      energy: '5 Star BEE Rating',
+      warranty: '1 Year Comprehensive + 10 Years Compressor Warranty',
+      tech: 'Inverter Cooling Technology',
+      image: 'https://images.unsplash.com/photo-1631545806609-99d586a2cb74?w=800&q=80',
+      features: ['5 Star BEE Rating', 'Inverter Cooling Technology', 'Anti-Bacterial Filter', 'Low Noise Operation']
+    },
+    refrigerator: {
+      color: 'Silver',
+      energy: '3 Star BEE Rating',
+      warranty: '1 Year Product + 10 Years Compressor Warranty',
+      tech: 'Smart Inverter Compressor',
+      image: 'https://images.unsplash.com/photo-1571175443880-49ca94889491?w=800&q=80',
+      features: ['Frost Free Operation', 'Smart Inverter Compressor', 'Multi Air Flow', 'Stabilizer Free']
+    },
+    washing: {
+      color: 'Silver',
+      energy: '5 Star BEE Rating',
+      warranty: '2 Years Comprehensive + 10 Years Motor Warranty',
+      tech: 'Smart Inverter Motor',
+      image: 'https://images.unsplash.com/photo-1626806819282-2aa113a747f6?w=800&q=80',
+      features: ['Multiple Wash Programs', 'Smart Inverter Motor', 'Child Lock', 'Quick Wash Mode']
+    },
+    tv: {
+      color: 'Black',
+      energy: 'Smart Power Saving',
+      warranty: '1 Year Comprehensive + 1 Year Panel Warranty',
+      tech: '4K HDR Picture Processor',
+      image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=800&q=80',
+      features: ['4K Ultra HD Display', 'Smart TV Features', 'Multiple HDMI Ports', 'Dolby Audio']
+    },
+    microwave: {
+      color: 'Black',
+      energy: 'Energy Efficient',
+      warranty: '1 Year Machine + 3 Years Magnetron Warranty',
+      tech: 'Multi-Stage Heating',
+      image: 'https://images.unsplash.com/photo-1585659722983-3f344a2f8a1c?w=800&q=80',
+      features: ['Auto Cook Menus', 'Touch Control Panel', 'Child Lock', 'Timer Function']
+    },
+    kitchen: {
+      color: 'White',
+      energy: '750W Motor',
+      warranty: '2 Years Product + 5 Years Motor Warranty',
+      tech: 'High-Torque Copper Motor',
+      image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
+      features: ['750W Heavy Duty Motor', 'Stainless Steel Jars', 'Overload Protection', 'Durable Build']
+    },
+    default: {
+      color: 'Black',
+      energy: 'Energy Efficient',
+      warranty: '1 Year Manufacturer Warranty',
+      tech: 'Advanced Technology',
+      image: 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=800&q=80',
+      features: ['Premium Quality', 'Energy Efficient', 'Reliable Performance', 'Easy Maintenance']
+    }
+  };
+
+  const def = categoryDefaults[category] || categoryDefaults.default;
+  const displayName = brand && !cleanName.toLowerCase().startsWith(brand.toLowerCase())
+    ? `${brand} ${cleanName}`
+    : cleanName;
+
+  return normalizeProduct({
+    name: cleanName,
+    price: Number(price) || 0,
+    category,
+    brand: brand || '',
+    capacity,
+    color: def.color,
+    energyRating: def.energy,
+    warranty: def.warranty,
+    coolingTechnology: def.tech,
+    features: def.features,
+    image: def.image,
+    description: `${displayName} — premium quality ${category !== 'default' ? category : 'home'} appliance available at HI TECH REFRIGERATION & ELECTRONICS.`
+  });
 }
 
 async function getInventory(forceRefresh = false) {
@@ -141,7 +291,7 @@ async function getInventoryStats() {
   const products = await getInventory();
   const categories = new Set(products.map(p => p.category));
   const brands = new Set(products.map(p => p.brand).filter(Boolean));
-  const fallbackImage = 'images.unsplash.com/photo-1468495244123';
+  const fallbackImage = 'images.unsplash.com'; // any stock photo counts as a missing real image
   return {
     totalProducts: products.length,
     totalCategories: categories.size,
@@ -167,7 +317,12 @@ async function getBrandList() {
 function getPriceBounds(products) {
   const prices = products.map(p => Number(p.price)).filter(n => !Number.isNaN(n) && n > 0);
   if (!prices.length) return { min: 0, max: 100000 };
-  return { min: Math.floor(Math.min(...prices)), max: Math.ceil(Math.max(...prices)) };
+  const min = Math.floor(Math.min(...prices));
+  const max = Math.ceil(Math.max(...prices));
+  if (min === max) {
+    return { min: 0, max: Math.max(max, 10000) };
+  }
+  return { min, max };
 }
 
 function parsePrice(value) {
@@ -312,7 +467,7 @@ function renderProductCard(product) {
       <div class="product-image-wrap">
         <img src="${img}" alt="${escapeHtml(product.name)}"
              loading="lazy" decoding="async" width="400" height="260"
-             onerror="this.src='${fallback}'">
+             onerror="this.onerror=null; this.src='${fallback}'">
       </div>
       <div class="product-card-body">
         <h3 class="product-name">${escapeHtml(product.name)}</h3>
@@ -362,9 +517,9 @@ function renderProductCards(container, products, emptyMessage) {
 
 function bindViewDetailsButtons(container, products) {
   container.querySelectorAll('.btn-view-details').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const id = btn.dataset.productId;
-      const product = products.find(p => p.id === id) || getProductById(id);
+      const product = products.find(p => p.id === id) || await getProductById(id);
       openProductModal(product);
     });
   });
@@ -405,7 +560,7 @@ function openProductModal(product) {
     <div class="modal-grid">
       <div class="modal-image-wrap">
         <img src="${img}" alt="${escapeHtml(product.name)}" loading="lazy"
-             onerror="this.src='${fallback}'">
+             onerror="this.onerror=null; this.src='${fallback}'">
       </div>
       <div class="modal-info">
         <h2 id="modalProductName">${escapeHtml(product.name)}</h2>

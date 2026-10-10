@@ -6,7 +6,7 @@ window.addEventListener('scroll', () => {
   let current = '';
   sections.forEach(section => {
     const top = section.offsetTop - 120;
-    if (scrollY >= top) {
+    if (window.scrollY >= top) {
       current = section.getAttribute('id');
     }
   });
@@ -19,21 +19,17 @@ window.addEventListener('scroll', () => {
   });
 });
 
-// Contact form feedback
-document.querySelector('.contact-form').addEventListener('submit', function (e) {
-  e.preventDefault();
-  alert('Thank you! We will contact you shortly.');
-  this.reset();
-});
-
-// Display imported inventory on homepage
-const storeProducts = document.getElementById('storeProducts');
-if (storeProducts) {
-  getInventory(true).then(products => {
-    renderProductCards(
-      storeProducts,
-      products,
-      'Products coming soon. Visit our showroom for the latest stock.'
-    );
+// Contact form feedback (homepage inline contact form only)
+const homeContactForm = document.querySelector('.contact-form');
+if (homeContactForm) {
+  homeContactForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    alert('Thank you! We will contact you shortly.');
+    this.reset();
   });
 }
+
+// NOTE: rendering #storeProducts is handled by filters.js
+// (initHomeProductsPreview on pages without a #filterToolbar).
+// Do not duplicate that call here — it caused a race where two
+// separate renders competed for the same container on index.html.

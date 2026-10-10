@@ -71,7 +71,10 @@
     <section class="admin-inventory">
       <div class="inventory-header">
         <h2>Current Inventory</h2>
-        <span id="productCount" class="product-count">0 products</span>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span id="productCount" class="product-count">0 products</span>
+          <button type="button" id="clearAllBtn" class="btn-sm" style="background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer;">Clear All Inventory</button>
+        </div>
       </div>
       <div class="admin-search-bar">
         <input type="search" id="adminSearchInput" placeholder="Search products by name or brand...">
@@ -93,7 +96,7 @@
           <label for="editPrice">Selling Price (₹)</label>
           <input type="number" id="editPrice" required>
           <label for="editImage">Image URL</label>
-          <input type="url" id="editImage">
+          <input type="text" id="editImage">
           <label for="editCategory">Category</label>
           <select id="editCategory">
             <option value="ac">Air Conditioners</option>
